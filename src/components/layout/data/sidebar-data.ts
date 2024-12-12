@@ -30,9 +30,9 @@ export const sidebarData: SidebarData = {
   },
   teams: [
     {
-      name: 'Shadcn Admin',
+      name: 'Compaion',
       logo: Command,
-      plan: 'Vite + ShadcnUI',
+      plan: 'Free plan',
     },
     {
       name: 'Acme Inc',
@@ -55,7 +55,7 @@ export const sidebarData: SidebarData = {
           icon: IconLayoutDashboard,
         },
         {
-          title: 'Tasks',
+          title: 'Costs',
           url: '/tasks',
           icon: IconChecklist,
         },
@@ -65,7 +65,7 @@ export const sidebarData: SidebarData = {
           icon: IconPackages,
         },
         {
-          title: 'Chats',
+          title: 'Agents',
           url: '/chats',
           badge: '3',
           icon: IconMessages,
