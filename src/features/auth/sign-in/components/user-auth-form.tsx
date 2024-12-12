@@ -65,6 +65,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (response) => {
+      console.log('Google login success, token:', response.access_token);
       setIsLoading(true)
       try {
         await auth.login({ provider: 'google', token: response.access_token })
@@ -75,19 +76,26 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       }
     },
     onError: (error) => {
-      console.error('Google login failed:', error)
-    }
+      console.error('Google login error:', error)
+    },
+    flow: 'implicit'
   });
 
   const handleMicrosoftLogin = async () => {
+    console.log('Attempting Microsoft login...');
     setIsLoading(true)
     try {
+      console.log('Opening Microsoft login popup...');
       const response = await instance.loginPopup(loginRequest)
+      console.log('Microsoft login response:', response);
       if (response) {
         await auth.login({ provider: 'microsoft', token: response.accessToken })
       }
     } catch (error) {
-      console.error('Microsoft login failed:', error)
+      console.error('Microsoft login error:', error)
+      if (error.errorCode === 'invalid_request') {
+        console.error('Redirect URI mismatch. Current URI:', window.location.origin + '/auth/sign-in');
+      }
     } finally {
       setIsLoading(false)
     }

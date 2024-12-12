@@ -1,11 +1,14 @@
 import { Configuration, RedirectRequest } from '@azure/msal-browser';
 
+const redirectUri = `${window.location.origin}/auth/sign-in`;
+console.log('Microsoft Auth Redirect URI:', redirectUri);
+
 // MSAL configuration for Microsoft authentication
 export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_AZURE_CLIENT_ID ?? '',
     authority: 'https://login.microsoftonline.com/common', // Use 'common' for multi-tenant + personal accounts
-    redirectUri: `${window.location.origin}/auth/sign-in`, // Match Azure Portal redirect URI
+    redirectUri,
     postLogoutRedirectUri: window.location.origin,
     navigateToLoginRequestUrl: true
   },
