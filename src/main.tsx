@@ -7,10 +7,14 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+import { PublicClientApplication } from '@azure/msal-browser'
+import { MsalProvider } from '@azure/msal-react'
 import { useAuthStore } from '@/stores/authStore'
 import { handleServerError } from '@/utils/handle-server-error'
 import { toast } from '@/hooks/use-toast'
 import { ThemeProvider } from './context/theme-context'
+import { msalConfig } from './config/auth'
 import './index.css'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
@@ -75,6 +79,8 @@ const queryClient = new QueryClient({
   }),
 })
 
+const msalInstance = new PublicClientApplication(msalConfig);
+
 // Create a new router instance
 const router = createRouter({
   routeTree,
@@ -93,14 +99,17 @@ declare module '@tanstack/react-router' {
 // Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
-  root.render(
+  ReactDOM.createRoot(rootElement).render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
-          <RouterProvider router={router} />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </StrictMode>
+      <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
+        <QueryClientProvider client={queryClient}>
+          <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+            <MsalProvider instance={msalInstance}>
+              <RouterProvider router={router} />
+            </MsalProvider>
+          </GoogleOAuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </StrictMode>,
   )
 }

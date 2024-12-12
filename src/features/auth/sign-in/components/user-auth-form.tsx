@@ -5,7 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
 import { FcGoogle } from 'react-icons/fc'
 import { BsMicrosoft } from 'react-icons/bs'
+import { useGoogleLogin } from '@react-oauth/google'
+import { useMsal } from '@azure/msal-react'
+import { loginRequest } from '@/config/auth'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/stores/authStore'
 import {
   Form,
   FormControl,
@@ -37,6 +41,8 @@ const formSchema = z.object({
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const { instance } = useMsal();
+  const auth = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,14 +52,45 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
-
-    setTimeout(() => {
+    try {
+      await auth.login(data)
+    } catch (error) {
+      console.error('Login failed:', error)
+    } finally {
       setIsLoading(false)
-    }, 3000)
+    }
+  }
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (response) => {
+      setIsLoading(true)
+      try {
+        await auth.login({ provider: 'google', token: response.access_token })
+      } catch (error) {
+        console.error('Google login failed:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    onError: (error) => {
+      console.error('Google login failed:', error)
+    }
+  });
+
+  const handleMicrosoftLogin = async () => {
+    setIsLoading(true)
+    try {
+      const response = await instance.loginPopup(loginRequest)
+      if (response) {
+        await auth.login({ provider: 'microsoft', token: response.accessToken })
+      }
+    } catch (error) {
+      console.error('Microsoft login failed:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -117,6 +154,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 type='button'
                 loading={isLoading}
                 leftSection={<FcGoogle className='h-5 w-5' />}
+                onClick={() => handleGoogleLogin()}
               >
                 Google
               </Button>
@@ -126,6 +164,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 type='button'
                 loading={isLoading}
                 leftSection={<BsMicrosoft className='h-4 w-4' />}
+                onClick={handleMicrosoftLogin}
               >
                 Microsoft
               </Button>
