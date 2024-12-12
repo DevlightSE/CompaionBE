@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { FcGoogle } from 'react-icons/fc'
+import { BsMicrosoft } from 'react-icons/bs'
 import { cn } from '@/lib/utils'
 import {
   Form,
@@ -115,18 +116,18 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 className='w-full'
                 type='button'
                 loading={isLoading}
-                leftSection={<IconBrandGithub className='h-4 w-4' />}
+                leftSection={<FcGoogle className='h-5 w-5' />}
               >
-                GitHub
+                Google
               </Button>
               <Button
                 variant='outline'
                 className='w-full'
                 type='button'
                 loading={isLoading}
-                leftSection={<IconBrandFacebook className='h-4 w-4' />}
+                leftSection={<BsMicrosoft className='h-4 w-4' />}
               >
-                Facebook
+                Microsoft
               </Button>
             </div>
           </div>
