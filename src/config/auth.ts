@@ -1,16 +1,17 @@
 import { Configuration, RedirectRequest } from '@azure/msal-browser';
 
-const redirectUri = `${window.location.origin}/auth/sign-in`;
+// Ensure redirect URI matches exactly with Azure App Registration
+const redirectUri = 'http://localhost:5173/auth/sign-in';
 console.log('Microsoft Auth Redirect URI:', redirectUri);
 
 // MSAL configuration for Microsoft authentication
 export const msalConfig: Configuration = {
   auth: {
-    clientId: import.meta.env.VITE_AZURE_CLIENT_ID ?? '',
-    authority: 'https://login.microsoftonline.com/common', // Use 'common' for multi-tenant + personal accounts
+    clientId: import.meta.env.VITE_AZURE_CLIENT_ID,
+    authority: 'https://login.microsoftonline.com/common',
     redirectUri,
-    postLogoutRedirectUri: window.location.origin,
-    navigateToLoginRequestUrl: true
+    postLogoutRedirectUri: 'http://localhost:5173',
+    navigateToLoginRequestUrl: true,
   },
   cache: {
     cacheLocation: 'sessionStorage',
@@ -19,7 +20,7 @@ export const msalConfig: Configuration = {
   system: {
     allowNativeBroker: false,
     loggerOptions: {
-      logLevel: 3, // Error
+      logLevel: 3,
       piiLoggingEnabled: false
     }
   }
@@ -27,8 +28,8 @@ export const msalConfig: Configuration = {
 
 // Add here scopes for id token to be used at MS Identity Platform endpoints.
 export const loginRequest: RedirectRequest = {
-  scopes: ['User.Read', 'profile', 'email', 'openid'],
-  prompt: 'select_account' // Always show account picker
+  scopes: ['openid', 'profile', 'email', 'User.Read', 'offline_access'],
+  prompt: 'select_account',
 };
 
 // Add here the endpoints for MS Graph API services you would like to use.

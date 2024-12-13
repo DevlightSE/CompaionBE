@@ -109,30 +109,39 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     console.log('Attempting Microsoft login...');
     setIsLoading(true)
     try {
-      console.log('Opening Microsoft login popup...');
-      const response = await instance.loginPopup(loginRequest)
-      console.log('Microsoft login response:', response);
-      if (response) {
-        await auth.login({ provider: 'microsoft', token: response.accessToken })
+      // Try to login with popup and PKCE
+      const response = await instance.loginPopup({
+        ...loginRequest,
+        prompt: 'select_account',
+      });
+      
+      if (response?.accessToken) {
+        await auth.login({ 
+          provider: 'microsoft', 
+          token: response.accessToken 
+        });
         toast({
           title: "Success!",
           description: "Redirecting to dashboard...",
-        })
+        });
+      } else {
+        throw new Error('No access token received');
       }
     } catch (error: any) {
-      console.error('Microsoft login error:', error)
-      if (error?.errorCode === 'invalid_request') {
-        console.error('Redirect URI mismatch. Current URI:', window.location.origin + '/auth/sign-in');
-      }
+      console.error('Microsoft login error:', error);
+      const errorMessage = error?.errorCode === 'invalid_request' 
+        ? 'Invalid login request. Please try again.'
+        : 'Failed to login with Microsoft. Please try again.';
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to login with Microsoft. Please try again.",
-      })
+        description: errorMessage,
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
