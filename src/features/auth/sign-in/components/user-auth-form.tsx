@@ -10,6 +10,7 @@ import { useMsal } from '@azure/msal-react'
 import { loginRequest } from '@/config/auth'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/stores/authStore'
+import { toast } from '@/hooks/use-toast'
 import {
   Form,
   FormControl,
@@ -56,8 +57,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true)
     try {
       await auth.login(data)
+      toast({
+        title: "Success!",
+        description: "Redirecting to dashboard...",
+      })
     } catch (error) {
       console.error('Login failed:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to login. Please try again.",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -69,14 +79,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       setIsLoading(true)
       try {
         await auth.login({ provider: 'google', token: response.access_token })
+        toast({
+          title: "Success!",
+          description: "Redirecting to dashboard...",
+        })
       } catch (error) {
-        console.error('Google login failed:', error)
+        console.error('Google login error:', error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to login with Google. Please try again.",
+        })
       } finally {
         setIsLoading(false)
       }
     },
     onError: (error) => {
       console.error('Google login error:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to login with Google. Please try again.",
+      })
     },
     flow: 'implicit'
   });
@@ -90,12 +114,21 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       console.log('Microsoft login response:', response);
       if (response) {
         await auth.login({ provider: 'microsoft', token: response.accessToken })
+        toast({
+          title: "Success!",
+          description: "Redirecting to dashboard...",
+        })
       }
     } catch (error) {
       console.error('Microsoft login error:', error)
       if (error.errorCode === 'invalid_request') {
         console.error('Redirect URI mismatch. Current URI:', window.location.origin + '/auth/sign-in');
       }
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to login with Microsoft. Please try again.",
+      })
     } finally {
       setIsLoading(false)
     }

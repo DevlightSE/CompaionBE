@@ -1,0 +1,264 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "CompaionBEAPI",
+    "version": "1.0",
+    "description": "API for Compaion authentication and services"
+  },
+  "paths": {
+    "/api/Auth/login/microsoft": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Initiates Microsoft OAuth flow",
+        "description": "Redirects user to Microsoft login page",
+        "responses": {
+          "302": {
+            "description": "Redirect to Microsoft login page",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Microsoft OAuth URL"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/microsoft-callback": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Handle Microsoft OAuth callback",
+        "description": "Processes the callback from Microsoft OAuth",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Authorization code from Microsoft"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "State parameter for security validation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/login/google": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Initiates Google OAuth flow",
+        "description": "Redirects user to Google login page",
+        "responses": {
+          "302": {
+            "description": "Redirect to Google login page",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Google OAuth URL"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/google-callback": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Handle Google OAuth callback",
+        "description": "Processes the callback from Google OAuth",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Authorization code from Google"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "State parameter for security validation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/validate-token": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Validate social login token",
+        "description": "Validates token from social login providers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token validated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "required": ["accessToken", "user"]
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "accountNo": {
+            "type": "string",
+            "description": "Unique account identifier"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "User roles"
+          },
+          "exp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Token expiration timestamp"
+          }
+        },
+        "required": ["accountNo", "email", "role"]
+      },
+      "ValidateTokenRequest": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": ["google", "microsoft"],
+            "description": "OAuth provider"
+          },
+          "token": {
+            "type": "string",
+            "description": "OAuth token to validate"
+          }
+        },
+        "required": ["provider", "token"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": ["message"]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

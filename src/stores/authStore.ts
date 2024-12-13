@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie'
 import { create } from 'zustand'
 import { api } from '@/config/api'
+import { useNavigate } from '@tanstack/react-router'
 
 const ACCESS_TOKEN = 'thisisjustarandomstring'
 
@@ -83,6 +84,12 @@ export const useAuthStore = create<AuthState>()((set) => {
               user
             }
           }));
+
+          // Store token in cookie
+          Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken))
+
+          // Redirect to dashboard
+          window.location.href = '/dashboard'
         } catch (error) {
           console.error('Login failed:', error);
           throw error;
