@@ -192,7 +192,14 @@ export default function Dashboard() {
   )
 }
 
-const topNav = [
+interface NavItem {
+  title: string
+  href: string
+  isActive: boolean
+  disabled?: boolean
+}
+
+const topNav: NavItem[] = [
   // {
   //   title: 'Overview',
   //   href: 'dashboard/overview',

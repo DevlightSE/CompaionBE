@@ -119,9 +119,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           description: "Redirecting to dashboard...",
         })
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Microsoft login error:', error)
-      if (error.errorCode === 'invalid_request') {
+      if (error?.errorCode === 'invalid_request') {
         console.error('Redirect URI mismatch. Current URI:', window.location.origin + '/auth/sign-in');
       }
       toast({
